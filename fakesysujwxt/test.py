@@ -31,12 +31,12 @@ class TestFakeSysujwxt(unittest.TestCase):
         success, result = fakesysujwxt.get_score(self.cookie, self.sno, self.year, self.term)
         self.assertTrue(success)
 
-    def test_get_course_schedule(self):
-        success, result = fakesysujwxt.get_course_schedule(self.cookie, self.year, self.term)
+    def test_get_timetable(self):
+        success, result = fakesysujwxt.get_timetable(self.cookie, self.year, self.term)
         self.assertTrue(success)
 
-    def test_get_selecting_course(self):
-        success, result = fakesysujwxt.get_selecting_course(self.cookie, self.year, self.term, '30', '1')
+    def test_get_available_courses(self):
+        success, result = fakesysujwxt.get_available_courses(self.cookie, self.year, self.term, '30', '1')
         self.assertTrue(success)
 
     def test_get_course_result(self):
@@ -46,9 +46,9 @@ class TestFakeSysujwxt(unittest.TestCase):
     def test_expired_queries(self):
         success, result = fakesysujwxt.get_score(self.cookie[::-1], self.sno, self.year, self.term)
         self.assertEqual(result, 'expired')
-        success, result = fakesysujwxt.get_course_schedule(self.cookie[::-1], self.year, self.term)
+        success, result = fakesysujwxt.get_timetable(self.cookie[::-1], self.year, self.term)
         self.assertEqual(result, 'expired')
-        success, result = fakesysujwxt.get_selecting_course(self.cookie[::-1], self.year, self.term, '30', '1')
+        success, result = fakesysujwxt.get_available_courses(self.cookie[::-1], self.year, self.term, '30', '1')
         self.assertEqual(result, 'expired')
         success, result = fakesysujwxt.get_course_result(self.cookie[::-1], self.year, self.term)
         self.assertEqual(result, 'expired')
