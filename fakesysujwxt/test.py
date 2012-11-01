@@ -43,6 +43,14 @@ class TestFakeSysujwxt(unittest.TestCase):
         success, result = fakesysujwxt.get_course_result(self.cookie, self.year, self.term)
         self.assertTrue(success)
 
+    def test_get_earned_credit(self):
+        success, result = fakesysujwxt.get_earned_credit(self.cookie, self.sno, self.year, self.term)
+        self.assertTrue(success)
+
+    def test_get_gpa(self):
+        success, result = fakesysujwxt.get_gpa(self.cookie, self.sno, self.year, self.term)
+        self.assertTrue(success)
+
     def test_expired_queries(self):
         success, result = fakesysujwxt.get_score(self.cookie[::-1], self.sno, self.year, self.term)
         self.assertEqual(result, 'expired')
@@ -52,11 +60,15 @@ class TestFakeSysujwxt(unittest.TestCase):
         self.assertEqual(result, 'expired')
         success, result = fakesysujwxt.get_course_result(self.cookie[::-1], self.year, self.term)
         self.assertEqual(result, 'expired')
+        success, result = fakesysujwxt.get_earned_credit(self.cookie[::-1], self.sno, self.year, self.term)
+        self.assertEqual(result, 'expired')
+        success, result = fakesysujwxt.get_gpa(self.cookie[::-1], self.sno, self.year, self.term)
+        self.assertEqual(result, 'expired')
 
 if __name__ == '__main__':
     print sys.argv
     if len(sys.argv) != 3:
-        print 'Run tests using "python tests.py USERNAME PASSWORD"'
+        print 'Run tests using "python test.py USERNAME PASSWORD"'
         exit(-1)
     username = sys.argv[1]
     password = sys.argv[2]
