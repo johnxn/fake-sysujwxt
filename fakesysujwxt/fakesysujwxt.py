@@ -15,7 +15,6 @@ REQUEST_TIMEOUT = 25
 # ----------------
 # Basic functions
 # ----------------
-
 def format_to_json(unformated_json):
     # pat = r'(\w+(?=:))'
     pat = r'((?:(?<=[,{\[])\s*)(\w+)(?=:))'
@@ -363,6 +362,45 @@ def get_course_result(cookie, year, term):
     """ %(year, term)
     return retrive_data(url, cookie, query_json)
 
+def get_course_result_by_type(cookie, year, term, course_type):
+    url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=getTab1YxkcByxndxqkclbmpylbmxh'
+    query_json = """
+    {
+        header: {
+            "code": -100,
+            "message": {
+                "title": "",
+                "detail": ""
+            }
+        },
+        body: {
+            dataStores: {
+                table1yxkcStore: {
+                    rowSet: {
+                        "primary": [],
+                        "filter": [],
+                        "delete": []
+                    },
+                    name: "table1yxkcStore",
+                    pageNumber: 1,
+                    pageSize: 100,
+                    recordCount: 0,
+                    rowSetName: "pojo_com.neusoft.education.sysu.xk.drxsxkjg.entity.XkjgAndSsjhModel"
+                }
+            },
+            parameters: {
+                "args": [
+                    "01",
+                    "%s",
+                    "%s",
+                    "%s"
+                ]
+            }
+        }
+    }
+    """ %(course_type, year, term)
+    return retrive_data(url, cookie, query_json)
+
 def remove_course(cookie, id):
     print "Removing course: ", id, cookie
     url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=delXsxkjgFuncChanged'
@@ -612,19 +650,3 @@ def get_bbb(cookie):
     """
     return retrive_data(url, cookie, query_json)
 
-selected_course_url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=getTab1YxkcByxndxqkclbmpylbmxh'
-def get_selected_course(year, term, course_type, cookie):
-    srt = '{header:{"code": -100, "message": {"title": "", "detail": ""}},body:{dataStores:{table1yxkcStore:{rowSet:{"primary":[],"filter":[],"delete":[]},name:"table1yxkcStore",pageNumber:1,pageSize:10,recordCount:0,rowSetName:"pojo_com.neusoft.education.sysu.xk.drxsxkjg.entity.XkjgAndSsjhModel"}},parameters:{"args": ["01", "'+course_type+'", "'+year+'", "'+term+'"]}}}'
-    ch = pycurl.Curl()
-    ch.setopt(pycurl.URL, selected_course_url)
-    ch.setopt(pycurl.POST, True)
-    ch.setopt(pycurl.POSTFIELDS, srt)
-    ret = StringIO.StringIO()
-    ch.setopt(pycurl.WRITEFUNCTION, ret.write)
-    ch.setopt(pycurl.HTTPHEADER, ['Content-Type: multipart/form-data', 'render: unieap'])
-    ch.setopt(pycurl.COOKIE, "JSESSIONID="+cookie)
-    ch.perform()
-    ret_code = ch.getinfo(pycurl.HTTP_CODE)
-    ret_body = ret.getvalue() 
-    ch.close()
-    return ret_body
