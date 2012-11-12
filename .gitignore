@@ -1,6 +1,7 @@
 ### /Users/maple/.gitignore-boilerplates/Python.gitignore
 
 *.py[cod]
+fabfile.py*
 
 # C extensions
 *.so

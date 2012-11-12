@@ -1,16 +1,16 @@
 Fake SYSUJWXT
 =============
 
-SYSUJWXT API For Python
+Python wrapper for SYSUJWXT API
 
 声明：使用本API造成的一切后果自负。
 
 原理
 ----
 
-使用python的pycurl库模拟http登录，其中大部分功能都是通过json通信的，但是json是非标准的，只有javascript可以解析。
+使用python的pycurl库模拟http登录教务系统，其中大部分功能都是通过json通信的，但是json是非标准的，只有javascript可以解析。
 
-你可以用这个库实现任何和python相关的服务，比如用python web框架搭建一个教务系统的网站或搭建一个云服务提供api给手机app调用。
+你可以用这个库实现任何和python相关的服务，比如用python web框架搭建一个自用教务系统的网站或搭建一个云服务提供api给手机app调用。
 
 功能
 ----

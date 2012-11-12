@@ -43,6 +43,19 @@ class TestFakeSysujwxt(unittest.TestCase):
         success, result = fakesysujwxt.get_course_result(self.cookie, self.year, self.term)
         self.assertTrue(success)
 
+    def test_get_course_result_by_type(self):
+        success, result = fakesysujwxt.get_course_result_by_type(self.cookie, self.year, self.term, self.course_type)
+        self.assertTrue(success)
+
+    def test_get_tno(self):
+        success, result = fakesysujwxt.get_tno(self.cookie)
+        self.assertTrue(success)
+
+    # TODO set tno and grade
+    # def test_get_required_credit(self):
+        # success, result = fakesysujwxt.get_required_credit(self.cookie, self.grade, self.tno)
+        # self.assertTrue(success)
+
     def test_get_earned_credit(self):
         success, result = fakesysujwxt.get_earned_credit(self.cookie, self.sno, self.year, self.term)
         self.assertTrue(success)
