@@ -6,11 +6,17 @@ import pycurl
 import re
 import StringIO
 import json
+import logging
 
 __version__ = '0.2'
 
 LOGIN_TIMEOUT = 15
 REQUEST_TIMEOUT = 25
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.debug('Debugging mode enabled.')
 
 # ----------------
 # Basic functions
@@ -35,7 +41,7 @@ def retrive_data(url, cookie, request_json):
     try:
         ch.perform()
     except pycurl.error, e:
-        print "Request Error: ", e[0], e[1]
+        logging.error('%s, %s', e[0], e[1])
         return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
@@ -47,7 +53,6 @@ def retrive_data(url, cookie, request_json):
         return (True, ret_body)
 
 def login(username, passward):
-    print 'Login:', username, passward
     url = 'http://uems.sysu.edu.cn/jwxt/j_unieap_security_check.do'
 
     ch = pycurl.Curl()
@@ -64,24 +69,26 @@ def login(username, passward):
     try:
         ch.perform()
     except pycurl.error, e:
-        print "LoginError: ", e[0], e[1]
+        logging.error('%s, %s', e[0], e[1])
         return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ch.close()
     if ret_code == 200:
+        logging.debug('Login errorpass: %s %s', username, passward)
         return (False, 'errorpass')
     else:
         ret_header = ret.getvalue() 
         cookies = re.findall(r'^Set-Cookie: (.*);', ret_header, re.MULTILINE)
         cookie = cookies[0][11:]
+        logging.debug('Login success: %s %s', username, passward)
         return (True, cookie)
 
 # ------------
 # Score Query
 # ------------
 def get_score(cookie, sno, year, term=None):
-    print "Getting Score: ", sno, year, term, cookie
+    logging.debug('Getting score: %s %s %s %s', sno, year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=getKccjList'
     if term is None:
         term_param = ''
@@ -150,7 +157,7 @@ def get_score(cookie, sno, year, term=None):
 # Timetable Query
 # ----------------
 def get_timetable(cookie, year, term):
-    print "Getting course schedule: ", year, term, cookie
+    logging.debug('Getting timetable: %s %s %s', year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/sysu/xk/xskbcx/xskbcx.jsp'
 
     ch = pycurl.Curl()
@@ -162,7 +169,7 @@ def get_timetable(cookie, year, term):
     try:
         ch.perform()
     except pycurl.error, e:
-        print "Request Error: ", e[0], e[1]
+        logging.error('%s, %s', e[0], e[1])
         return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
@@ -182,7 +189,7 @@ def get_timetable(cookie, year, term):
 # Personal info Query
 # --------------------
 def get_info(cookie):
-    print "Getting detailed info:", cookie
+    logging.debug('Getting info: %s', cookie)
     url = "http://uems.sysu.edu.cn/jwxt/WhzdAction/WhzdAction.action?method=getGrwhxxList"
     query_json = """
     {
@@ -220,7 +227,7 @@ def get_info(cookie):
 # Course Selecting Query
 # -----------------------
 def get_available_courses(cookie, year, term, course_type, campus):
-    print "Getting selecting course: ", year, term, course_type, cookie
+    logging.debug('Getting available course: %s %s %s %s %s', year, term, course_type, campus, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=getJxbxxFunc'
     if course_type == '30':
         campus_para = """
@@ -272,8 +279,8 @@ def get_available_courses(cookie, year, term, course_type, campus):
     """ %(campus_para, year, term, course_type)
     return retrive_data(url, cookie, query_json)
 
-def add_course(cookie, id, year, term):
-    print "Selecting course: ", id, cookie, year, term
+def add_course(cookie, resource_id, year, term):
+    logging.debug('Adding course: %s %s %s %s', resource_id, year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=selectCoursesChanged'
     query_json = """
     {
@@ -304,14 +311,14 @@ def add_course(cookie, id, year, term):
             }
         }
     }
-    """ %(id, year, term)
+    """ %(resource_id, year, term)
     return retrive_data(url, cookie, query_json)
 
 # --------------------
 # Course Result Query
 # --------------------
 def get_course_result(cookie, year, term):
-    print "Getting course result: ", year, term, cookie
+    logging.debug('Getting course result: %s %s %s', year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xstk/xstk.action?method=getXkxkjglistByxh'
     query_json = """
     {
@@ -363,6 +370,7 @@ def get_course_result(cookie, year, term):
     return retrive_data(url, cookie, query_json)
 
 def get_course_result_by_type(cookie, year, term, course_type):
+    logging.debug('Getting course result by type: %s %s %s %s', year, term, course_type, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=getTab1YxkcByxndxqkclbmpylbmxh'
     query_json = """
     {
@@ -401,8 +409,8 @@ def get_course_result_by_type(cookie, year, term, course_type):
     """ %(course_type, year, term)
     return retrive_data(url, cookie, query_json)
 
-def remove_course(cookie, id):
-    print "Removing course: ", id, cookie
+def remove_course(cookie, resource_id):
+    logging.debug('Removing course: %s %s', resource_id, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xsxk/xsxk.action?method=delXsxkjgFuncChanged'
     query_json = """
     {
@@ -421,11 +429,11 @@ def remove_course(cookie, id):
             }
         }
     }
-    """ %(id)
+    """ %(resource_id)
     return retrive_data(url, cookie, query_json)
 
 def reset_password(cookie, new_password):
-    print "Resetting passward:", new_password, cookie
+    logging.debug('Resetting passward: %s %s', new_password, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/GbmmAction/GbmmAction.action?method=gbmm'
     query_json = """
     {
@@ -455,7 +463,7 @@ def get_tno(cookie):
     """
     获取[学号], [年级], [教学号]
     """
-    print "Getting info:", cookie
+    logging.debug('Getting tno: %s', cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=judgeStu'
     query_json = """
     {
@@ -494,6 +502,7 @@ def get_required_credit(cookie, grade, tno):
     """
     获取要求总学分
     """
+    logging.debug('Getting required credit: %s %s %s', grade, tno, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=getZyxf'
     query_json = """
     {
@@ -554,6 +563,7 @@ def get_earned_credit(cookie, sno, year='', term=''):
     """
     获取已取得的学分
     """
+    logging.debug('Getting earned credit: %s %s %s %s', sno, year, term, cookie)
     url = 'http://uems.sysu.edu.cn//jwxt/xscjcxAction/xscjcxAction.action?method=getAllXf'
     query_json = """
     {
@@ -596,6 +606,7 @@ def get_gpa(cookie, sno, year='', term=''):
     """
     获取已取得的总基点: 专必 公必 公选 专选
     """
+    logging.debug('Getting gpa: %s %s %s %s', sno, year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=getAllJd'
     query_json = """
     {
