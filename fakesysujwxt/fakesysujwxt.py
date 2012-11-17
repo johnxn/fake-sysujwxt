@@ -45,7 +45,7 @@ def retrive_data(url, cookie, request_json):
         return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
-    ret_body = ret.getvalue() 
+    ret_body = ret.getvalue()
     ch.close()
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
         return (False, 'expired')
@@ -78,7 +78,7 @@ def login(username, passward):
         logging.debug('Login errorpass: %s %s', username, passward)
         return (False, 'errorpass')
     else:
-        ret_header = ret.getvalue() 
+        ret_header = ret.getvalue()
         cookies = re.findall(r'^Set-Cookie: (.*);', ret_header, re.MULTILINE)
         cookie = cookies[0][11:]
         logging.debug('Login success: %s %s', username, passward)
@@ -87,10 +87,22 @@ def login(username, passward):
 # ------------
 # Score Query
 # ------------
-def get_score(cookie, sno, year, term=None):
+def get_score(cookie, sno, year='', term=''):
     logging.debug('Getting score: %s %s %s %s', sno, year, term, cookie)
     url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=getKccjList'
-    if term is None:
+    if not year:
+        year_param = ''
+    else:
+        year_param = """
+                    {
+                        "name": "Filter_t.xn_0.3563793106347481",
+                        "type": "String",
+                        "value": "'%s'",
+                        "condition": " = ",
+                        "property": "t.xn"
+                    },
+                    """ %year
+    if not term:
         term_param = ''
     else:
         term_param = """
@@ -128,13 +140,7 @@ def get_score(cookie, sno, year, term=None):
                         "condition": " = ",
                         "property": "t.pylbm"
                     },
-                    {
-                        "name": "Filter_t.xn_0.3563793106347481",
-                        "type": "String",
-                        "value": "'%s'",
-                        "condition": " = ",
-                        "property": "t.xn"
-                    },
+                    %s
                     %s
                     {
                         "name": "xh",
@@ -150,7 +156,7 @@ def get_score(cookie, sno, year, term=None):
             }
         }
     }
-    """ %(year, term_param, sno)
+    """ %(year_param, term_param, sno)
     return retrive_data(url, cookie, query_json)
 
 # ----------------
@@ -173,7 +179,7 @@ def get_timetable(cookie, year, term):
         return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
-    ret_body = ret.getvalue() 
+    ret_body = ret.getvalue()
     ch.close()
 
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
@@ -239,7 +245,7 @@ def get_available_courses(cookie, year, term, course_type, campus):
             "property": "A.SKJSSZXQ"
         }
         """ %(campus)
-    else: 
+    else:
         campus_para = ""
 
     query_json = """
@@ -446,7 +452,7 @@ def reset_password(cookie, new_password):
         },
         body: {
             dataStores: {
-                
+
             },
             parameters: {
                 "args": [
