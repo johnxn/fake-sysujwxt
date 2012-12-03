@@ -14,7 +14,7 @@ LOGIN_TIMEOUT = 15
 REQUEST_TIMEOUT = 25
 
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
+                    format='%(asctime)s [%(process)d] [%(levelname)s] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 logging.debug('Debugging mode enabled.')
 
@@ -42,13 +42,13 @@ def retrive_data(url, cookie, request_json):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'timeout')
+        return (False, 'Request Timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ret_body = ret.getvalue()
     ch.close()
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
-        return (False, 'expired')
+        return (False, 'Session Expired')
     else:
         return (True, ret_body)
 
@@ -70,13 +70,13 @@ def login(username, passward):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'timeout')
+        return (False, 'Request Timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ch.close()
     if ret_code == 200:
         logging.debug('Login errorpass: %s %s', username, passward)
-        return (False, 'errorpass')
+        return (False, 'Authentication Failed')
     else:
         ret_header = ret.getvalue()
         cookies = re.findall(r'^Set-Cookie: (.*);', ret_header, re.MULTILINE)
@@ -176,14 +176,14 @@ def get_timetable(cookie, year, term):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'timeout')
+        return (False, 'Request Timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ret_body = ret.getvalue()
     ch.close()
 
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
-        return (False, 'expired')
+        return (False, 'Session Expired')
     else:
         # add course time to schedule table
         pat = r'^var jcshowdata.*$'
