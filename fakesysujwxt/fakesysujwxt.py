@@ -42,13 +42,13 @@ def retrive_data(url, cookie, request_json):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'Request Timeout')
+        return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ret_body = ret.getvalue()
     ch.close()
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
-        return (False, 'Session Expired')
+        return (False, 'expired')
     else:
         return (True, ret_body)
 
@@ -70,13 +70,13 @@ def login(username, passward):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'Request Timeout')
+        return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ch.close()
     if ret_code == 200:
         logging.debug('Login errorpass: %s %s', username, passward)
-        return (False, 'Authentication Failed')
+        return (False, 'errorpass')
     else:
         ret_header = ret.getvalue()
         cookies = re.findall(r'^Set-Cookie: (.*);', ret_header, re.MULTILINE)
@@ -176,14 +176,14 @@ def get_timetable(cookie, year, term):
         ch.perform()
     except pycurl.error, e:
         logging.error('%s, %s', e[0], e[1])
-        return (False, 'Request Timeout')
+        return (False, 'timeout')
 
     ret_code = ch.getinfo(pycurl.HTTP_CODE)
     ret_body = ret.getvalue()
     ch.close()
 
     if (ret_body.startswith('THE-NODE-OF-SESSION-TIMEOUT', 5)):
-        return (False, 'Session Expired')
+        return (False, 'expired')
     else:
         # add course time to schedule table
         pat = r'^var jcshowdata.*$'
