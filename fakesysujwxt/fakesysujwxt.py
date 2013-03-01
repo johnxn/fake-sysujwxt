@@ -16,6 +16,8 @@ REQUEST_TIMEOUT = 25
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s [%(process)d] [%(levelname)s] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
+
+logging.disable(logging.CRITICAL)
 logging.debug('Debugging mode enabled.')
 
 # ----------------
@@ -570,7 +572,7 @@ def get_earned_credit(cookie, sno, year='', term=''):
     获取已取得的学分
     """
     logging.debug('Getting earned credit: %s %s %s %s', sno, year, term, cookie)
-    url = 'http://uems.sysu.edu.cn//jwxt/xscjcxAction/xscjcxAction.action?method=getAllXf'
+    url = 'http://uems.sysu.edu.cn/jwxt/xscjcxAction/xscjcxAction.action?method=getAllXf'
     query_json = """
     {
         header: {
